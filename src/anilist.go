@@ -30,7 +30,7 @@ for any manga.
 type MangaInfo struct{
 	ID       int64
 	Chapters int32
-	isAdult  bool
+	IsAdult  bool
 	Status   string
 	Genre    string
 }
