@@ -9,18 +9,17 @@ For primary use in the Ami anime client: https://github.com/Avuxo/Ami/
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"github.com/shurcooL/graphql"
 )
 
 
 /*
-AnimeInfo
+animeInfo
 After a GQL query of AniList, this is the query data returned
 for any anime.
 */
-type AnimeInfo struct{
+type animeInfo struct{
 	ID       int64
 	Episodes int32
 	Title    string
@@ -30,11 +29,11 @@ type AnimeInfo struct{
 }
 
 /*
-MangaInfo
+mangaInfo
 After a GQL query of AniList, this is the query data returned
 for any manga.
 */
-type MangaInfo struct{
+type mangaInfo struct{
 	ID       int64
 	Chapters int32
 	IsAdult  bool
@@ -43,14 +42,14 @@ type MangaInfo struct{
 }
 
 /*
-UserInfo
+userInfo
 Query a user's basic info.
 ID:   the user ID
 Name: The user name
 Bio:  The `about' section of the user.
 Url:  The URL of their profile
 */
-type UserInfo struct{
+type userInfo struct{
 	ID   int64
 	Name string
 	Bio  string
@@ -58,18 +57,31 @@ type UserInfo struct{
 }
 
 /*
-AnimeList
+animeList
 An AniList animelist 
 */
-type AnimeList struct{
-	Owner       UserInfo
-	Watching    []AnimeInfo
-	Completed   []AnimeInfo
-	OnHold      []AnimeInfo
-	PlanToWatch []AnimeInfo
-	Dropped     []AnimeInfo
+type animeList struct{
+	Owner       userInfo
+	Watching    []animeInfo
+	Completed   []animeInfo
+	OnHold      []animeInfo
+	PlanToWatch []animeInfo
+	Dropped     []animeInfo
 	
 }
+
+/* 
+QUERY STRUCTS 
+These are all structured GraphQL queries using the schemas
+defined at https://anilist.github.io/ApiV2-GraphQL-Docs/.
+For each individual internal structure, there is a corresponding
+query structure.
+*/
+type userQuery struct{
+	Name graphql.String
+	About graphql.String
+	SiteUrl graphql.String
+} 
 
 // fetch info on a given anime
 func fetchAnimeInfo(ID int64) {
@@ -82,15 +94,12 @@ func fetchMangaInfo(ID int64){
 }
 
 // fetch info on a given user
-func fetchUserInfo(ID int64){
+func fetchUserInfo(ID int64) (info userInfo){
 
 	// form the GQL query.
 	var query struct{
 		// User() query.
-		User struct{
-			// get the `name' field.
-			Name graphql.String
-		} `graphql:"User(id: $id)"`
+		User userQuery `graphql:"User(id: $id)"`
 	}
 
 	client := graphql.NewClient("https://graphql.anilist.co", nil)
@@ -105,9 +114,15 @@ func fetchUserInfo(ID int64){
 	if err != nil{
 		log.Fatal(err)
 	}
+	
+	// convert the query struct into the return struct.
+	info = userInfo{
+		int64(ID),
+		string(query.User.Name),
+		string(query.User.About),
+		string(query.User.SiteUrl) }
 
-	fmt.Println(query.User.Name)
-
+	return info
 }
 // fetch an anime list for a given user
 func fetchAnimeList(userName string){

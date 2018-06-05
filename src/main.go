@@ -11,7 +11,7 @@ func main() {
 	// load the config file
 	config := parseConfigFile();
 
-	fmt.Println(config) // example print file to show it works.
-
-	fetchUserInfo(134528)
+	fmt.Println(config) // example print file to show it
+	
+	fmt.Println(fetchUserInfo(134528))
 }
