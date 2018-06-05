@@ -7,6 +7,13 @@ For primary use in the Ami anime client: https://github.com/Avuxo/Ami/
 */
 
 
+import (
+	"context"
+	"fmt"
+	"log"
+	"github.com/shurcooL/graphql"
+)
+
 
 /*
 AnimeInfo
@@ -76,9 +83,32 @@ func fetchMangaInfo(ID int64){
 
 // fetch info on a given user
 func fetchUserInfo(ID int64){
-	// TODO
-}
 
+	// form the GQL query.
+	var query struct{
+		// User() query.
+		User struct{
+			// get the `name' field.
+			Name graphql.String
+		} `graphql:"User(id: $id)"`
+	}
+
+	client := graphql.NewClient("https://graphql.anilist.co", nil)
+
+	// form the GQL variables with a map.
+	variables := map[string]interface{}{
+		"id": graphql.Int(ID),
+	}
+	
+	// make the GQL query.
+	err := client.Query(context.Background(), &query, variables)
+	if err != nil{
+		log.Fatal(err)
+	}
+
+	fmt.Println(query.User.Name)
+
+}
 // fetch an anime list for a given user
 func fetchAnimeList(userName string){
 	// TODO
