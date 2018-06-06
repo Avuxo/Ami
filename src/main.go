@@ -13,5 +13,6 @@ func main() {
 
 	fmt.Println(config) // example print file to show it
 	
-	fmt.Println(fetchAnimeInfo(15125))
+	//fmt.Println(fetchMangaInfo(15125))
+	fetchAnimeList("benwhom")
 }

@@ -4,3 +4,4 @@ An AniList integrated client with support for RSS feeds to maintain your current
 ## Libraries used
 
 - [GraphQL by shurcooL](https://github.com/shurcooL/graphql)
+- [OAuth2 Library](https://golang.org/x/oauth2)
