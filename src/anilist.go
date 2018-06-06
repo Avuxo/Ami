@@ -11,8 +11,15 @@ import (
 	"context"
 	"log"
 	"github.com/shurcooL/graphql"
+
 )
 
+/*
+NATIVE STRUCTURES
+The native structures allow for storage of native datatypes.
+If just the query structures were used then the `graphql'
+types would all be used.
+*/
 
 /*
 animeInfo
@@ -25,7 +32,7 @@ type animeInfo struct{
 	Title    string
 	IsAdult  bool
 	Status   string
-	Genre    string
+	Genres   []string
 }
 
 /*
@@ -38,7 +45,7 @@ type mangaInfo struct{
 	Chapters int32
 	IsAdult  bool
 	Status   string
-	Genre    string
+	Genres   []string
 }
 
 /*
@@ -78,14 +85,55 @@ For each individual internal structure, there is a corresponding
 query structure.
 */
 type userQuery struct{
-	Name graphql.String
-	About graphql.String
+	Name    graphql.String
+	About   graphql.String
 	SiteUrl graphql.String
 } 
 
+type mediaQuery struct{
+	IsAdult  bool
+	Episodes graphql.Int
+	Genres   []graphql.String
+	Status   graphql.String
+	Title struct{
+		Romaji graphql.String
+	}
+	
+}
+
 // fetch info on a given anime
-func fetchAnimeInfo(ID int64) {
-	// TODO
+func fetchAnimeInfo(ID int64) (info animeInfo){
+	var query struct{
+		Media mediaQuery `graphql:"Media(id: $id)"`
+	}
+	
+	client := graphql.NewClient("https://graphql.anilist.co", nil)
+
+	// configure the `id' variable into the passed var.
+	variables := map[string]interface{}{
+		"id": graphql.Int(ID),
+	}
+
+	err := client.Query(context.Background(), &query, variables)
+	if err != nil{
+		log.Fatal(err)
+	}
+	//convert []graphql.String to []string.
+	convertedGenres := make([]string, len(query.Media.Genres))
+	for i := range query.Media.Genres {
+		convertedGenres[i] = string(query.Media.Genres[i])
+	}
+
+	// parse the query into an internal structure.
+	info = animeInfo{
+		int64(ID),
+		int32(query.Media.Episodes),
+		string(query.Media.Title.Romaji),
+		query.Media.IsAdult,
+		string(query.Media.Status),
+		convertedGenres }
+
+	return info
 }
 
 // fetch info on a given manga
@@ -114,7 +162,7 @@ func fetchUserInfo(ID int64) (info userInfo){
 	if err != nil{
 		log.Fatal(err)
 	}
-	
+
 	// convert the query struct into the return struct.
 	info = userInfo{
 		int64(ID),

@@ -13,5 +13,5 @@ func main() {
 
 	fmt.Println(config) // example print file to show it
 	
-	fmt.Println(fetchUserInfo(134528))
+	fmt.Println(fetchAnimeInfo(15125))
 }
